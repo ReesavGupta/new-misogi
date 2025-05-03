@@ -22,6 +22,9 @@ model User {
   created_at    DateTime @default(now())
 
   RefreshToken RefreshToken[]
+  Habit        Habit[]
+  HabitLog     HabitLog[]
+  UserSettings UserSettings?
 }
 
 model RefreshToken {
@@ -32,4 +35,50 @@ model RefreshToken {
   expiresAt DateTime
   createdAt DateTime @default(now())
   revoked   Boolean  @default(false)
+}
+
+model Habit {
+  id         String     @id @default(uuid())
+  name       String
+  targetDays String     @default("everyday") // "everyday", "weekdays", "custom"
+  customDays String? // JSON string for custom days e.g. "[0,2,4]" for Sun, Tue, Thu
+  startDate  DateTime   @default(now())
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId     String
+  habitLogs  HabitLog[]
+
+  // Calculated fields (will be handled in application logic)
+  // currentStreak
+  // longestStreak
+
+  @@index([userId])
+}
+
+model HabitLog {
+  id        String   @id @default(uuid())
+  date      DateTime
+  completed Boolean
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  habit     Habit    @relation(fields: [habitId], references: [id], onDelete: Cascade)
+  habitId   String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+
+  @@unique([habitId, date])
+  @@index([userId])
+  @@index([habitId])
+  @@index([date]) 
+}
+
+model UserSettings {
+  id           String  @id @default(uuid())
+  user         User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId       String  @unique
+  theme        String  @default("light")
+  reminderTime String? // Format: "HH:MM" (24-hour format)
+
+  @@index([userId])
 }
