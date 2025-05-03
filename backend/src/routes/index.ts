@@ -10,6 +10,6 @@ import dashboardRouter from '../routes/dashboard.routes'
 router.use('/auth', authRouter)
 router.use('/habit', habitRouter)
 router.use('/settings', settingsRouter)
-router.use('/dashboard', settingsRouter)
+router.use('/dashboard', dashboardRouter)
 
 export default router
