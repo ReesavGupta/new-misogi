@@ -1,139 +1,179 @@
-// src/contexts/AuthContext.tsx
-import React, {
+// Fixed AuthContext.tsx
+import {
   createContext,
   useContext,
   useState,
   useEffect,
-  ReactNode,
+  type ReactNode,
 } from 'react'
-import { User, LoginData, RegisterData } from '../types'
-import { login, register, logout } from '../api/authService'
+import { loginUser, registerUser, logoutUser, refreshToken } from '../api/auth'
+import type { User, ApiResponse } from '../types'
 
 interface AuthContextType {
   user: User | null
   isAuthenticated: boolean
   isLoading: boolean
-  error: string | null
-  login: (data: LoginData) => Promise<void>
-  register: (data: RegisterData) => Promise<void>
+  login: (email: string, password: string) => Promise<void>
+  register: (name: string, email: string, password: string) => Promise<void>
   logout: () => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
-export const useAuth = (): AuthContextType => {
+export const AuthProvider = ({ children }: { children: ReactNode }) => {
+  const [user, setUser] = useState<User | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    // Check if user is already logged in
+    const checkAuth = async () => {
+      try {
+        const token = localStorage.getItem('accessToken')
+        console.log('Initial auth check - token exists:', !!token)
+
+        if (token) {
+          // Try to refresh the token
+          try {
+            const response = await refreshToken()
+            console.log('Refresh token response:', response)
+
+            if (response.success || response.status === 'success') {
+              // Store the new token
+              const accessToken =
+                response.data?.accessToken || response.accessToken
+              localStorage.setItem('accessToken', accessToken)
+
+              // Get user data from localStorage
+              const userData = localStorage.getItem('user')
+              if (userData) {
+                setUser(JSON.parse(userData))
+                console.log('User restored from localStorage')
+              }
+            } else {
+              // If refresh returns unsuccessful response
+              console.log('Token refresh unsuccessful, clearing auth data')
+              localStorage.removeItem('accessToken')
+              localStorage.removeItem('user')
+            }
+          } catch (refreshError) {
+            // Handle refresh token failure explicitly
+            console.error('Token refresh failed:', refreshError)
+            localStorage.removeItem('accessToken')
+            localStorage.removeItem('user')
+          }
+        }
+      } catch (error) {
+        console.error('Authentication check failed:', error)
+        localStorage.removeItem('accessToken')
+        localStorage.removeItem('user')
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    checkAuth()
+  }, [])
+
+  const login = async (email: string, password: string) => {
+    setIsLoading(true)
+    try {
+      const response = await loginUser(email, password)
+      console.log('Login response:', response)
+
+      if (response.success || response.status === 'success') {
+        const userData = response.data?.user || response.user
+        const accessToken = response.data?.accessToken || response.accessToken
+
+        console.log('Storing auth data:', {
+          accessToken: !!accessToken,
+          userData,
+        })
+
+        localStorage.setItem('accessToken', accessToken)
+        localStorage.setItem('user', JSON.stringify(userData))
+        setUser(userData)
+
+        // After updating state, manually navigate
+        window.location.href = '/'
+      } else {
+        throw new Error('Login failed')
+      }
+    } catch (error) {
+      console.error('Login failed:', error)
+      throw error
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const register = async (name: string, email: string, password: string) => {
+    setIsLoading(true)
+    try {
+      const response = await registerUser(name, email, password)
+      console.log('Register response:', response)
+
+      if (response.status === 'success' || response.success) {
+        const userData = response.data?.user || response.user
+        const accessToken = response.data?.accessToken || response.accessToken
+
+        localStorage.setItem('accessToken', accessToken)
+        localStorage.setItem('user', JSON.stringify(userData))
+        setUser(userData)
+
+        // After updating state, manually navigate
+        window.location.href = '/'
+      } else {
+        throw new Error('Registration failed')
+      }
+    } catch (error) {
+      console.error('Registration failed:', error)
+      throw error
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const logout = async () => {
+    setIsLoading(true)
+    try {
+      await logoutUser()
+      localStorage.removeItem('accessToken')
+      localStorage.removeItem('user')
+      setUser(null)
+    } catch (error) {
+      console.error('Logout failed:', error)
+      // Clear local storage even if API call fails
+      localStorage.removeItem('accessToken')
+      localStorage.removeItem('user')
+      setUser(null)
+    } finally {
+      setIsLoading(false)
+      // Redirect to login page after logout
+      window.location.href = '/login'
+    }
+  }
+
+  return (
+    <AuthContext.Provider
+      value={{
+        user,
+        isAuthenticated: !!user,
+        isLoading,
+        login,
+        register,
+        logout,
+      }}
+    >
+      {children}
+    </AuthContext.Provider>
+  )
+}
+
+export const useAuth = () => {
   const context = useContext(AuthContext)
-  if (!context) {
+  console.log('Auth context:', context)
+  if (context === undefined) {
     throw new Error('useAuth must be used within an AuthProvider')
   }
   return context
-}
-
-interface AuthProviderProps {
-  children: ReactNode
-}
-
-export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-
-  useEffect(() => {
-    // Check if user is already logged in (from localStorage)
-    const storedUser = localStorage.getItem('user')
-    const accessToken = localStorage.getItem('accessToken')
-
-    if (storedUser && accessToken) {
-      try {
-        setUser(JSON.parse(storedUser))
-      } catch (err) {
-        // If there's an error parsing the user, clear the storage
-        localStorage.removeItem('user')
-        localStorage.removeItem('accessToken')
-        localStorage.removeItem('refreshToken')
-      }
-    }
-
-    setIsLoading(false)
-  }, [])
-
-  const handleLogin = async (data: LoginData) => {
-    try {
-      setIsLoading(true)
-      setError(null)
-
-      const response = await login(data)
-
-      if (response.success) {
-        const { user, accessToken, refreshToken } = response.data
-
-        // Save user and tokens to localStorage
-        localStorage.setItem('user', JSON.stringify(user))
-        localStorage.setItem('accessToken', accessToken)
-        localStorage.setItem('refreshToken', refreshToken)
-
-        setUser(user)
-      } else {
-        setError(response.message || 'An error occurred during login')
-      }
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to login')
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  const handleRegister = async (data: RegisterData) => {
-    try {
-      setIsLoading(true)
-      setError(null)
-
-      const response = await register(data)
-
-      if (response.success) {
-        const { user, accessToken, refreshToken } = response.data
-
-        // Save user and tokens to localStorage
-        localStorage.setItem('user', JSON.stringify(user))
-        localStorage.setItem('accessToken', accessToken)
-        localStorage.setItem('refreshToken', refreshToken)
-
-        setUser(user)
-      } else {
-        setError(response.message || 'An error occurred during registration')
-      }
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to register')
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  const handleLogout = async () => {
-    try {
-      setIsLoading(true)
-      await logout()
-      setUser(null)
-    } catch (err) {
-      console.error('Logout error:', err)
-    } finally {
-      // Ensure we clear local storage even if the API call fails
-      localStorage.removeItem('user')
-      localStorage.removeItem('accessToken')
-      localStorage.removeItem('refreshToken')
-      setIsLoading(false)
-    }
-  }
-
-  const value = {
-    user,
-    isAuthenticated: !!user,
-    isLoading,
-    error,
-    login: handleLogin,
-    register: handleRegister,
-    logout: handleLogout,
-  }
-
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }
