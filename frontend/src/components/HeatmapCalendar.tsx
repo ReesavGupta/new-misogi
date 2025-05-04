@@ -32,16 +32,13 @@ const HeatmapCalendar = ({ data, year, month }: HeatmapCalendarProps) => {
     'December',
   ]
 
-  // Improved date mapping logic to handle date conversions correctly
+  // Fixed date mapping logic to handle date conversions correctly
   const dateMap = useMemo(() => {
     const map = new Map<string, number>()
     data.forEach((item) => {
-      // Format date as YYYY-MM-DD
-      const date = new Date(item.date)
-      const formattedDate = `${date.getFullYear()}-${String(
-        date.getMonth() + 1
-      ).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
-      map.set(formattedDate, item.value)
+      // Create a date that's timezone-safe
+      const dateStr = new Date(item.date).toISOString().split('T')[0]
+      map.set(dateStr, item.value)
     })
     return map
   }, [data])
@@ -64,10 +61,11 @@ const HeatmapCalendar = ({ data, year, month }: HeatmapCalendarProps) => {
     }
 
     for (let day = 1; day <= daysInMonth; day++) {
-      // Create date string in YYYY-MM-DD format
-      const formattedMonth = String(month + 1).padStart(2, '0')
-      const formattedDay = String(day).padStart(2, '0')
-      const key = `${year}-${formattedMonth}-${formattedDay}`
+      // Create date string in YYYY-MM-DD format without timezone conversion
+
+      const padMonth = (month + 1).toString().padStart(2, '0')
+      const padDay = day.toString().padStart(2, '0')
+      const key = `${year}-${padMonth}-${padDay}`
 
       const value = dateMap.get(key)
 
@@ -76,6 +74,11 @@ const HeatmapCalendar = ({ data, year, month }: HeatmapCalendarProps) => {
         today.getFullYear() === year &&
         today.getMonth() === month &&
         today.getDate() === day
+
+      console.log('datemap: ', dateMap)
+      console.log('value: ', value)
+      console.log('key: ', key)
+      console.log('today: ', today)
 
       days.push(
         <div

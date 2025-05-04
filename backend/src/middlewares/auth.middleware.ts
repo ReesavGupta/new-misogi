@@ -8,10 +8,10 @@ const authenticateToken = async (
   res: Response,
   next: NextFunction
 ) => {
-  console.log('Request header:', req.header('Authorization'))
+  // console.log('Request header:', req.header('Authorization'))
 
   const token = req.header('Authorization')?.split(' ')[1]
-  console.log('Token from header:', token)
+  // console.log('Token from header:', token)
 
   if (!token) {
     return next(new ApiError(401, 'No token provided'))
@@ -23,7 +23,7 @@ const authenticateToken = async (
       userId: string
     }
 
-    console.log('Decoded token:', decoded)
+    // console.log('Decoded token:', decoded)
 
     const user = await prisma.user.findUnique({
       where: { id: decoded.userId },

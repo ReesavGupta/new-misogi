@@ -122,7 +122,7 @@ const Settings = () => {
           </div>
         </div>
 
-        <div className="p-6">
+        {/* <div className="p-6">
           <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
             Notifications
           </h2>
@@ -161,7 +161,7 @@ const Settings = () => {
               </button>
             </div>
           </div>
-        </div>
+        </div> */}
       </div>
     </div>
   )

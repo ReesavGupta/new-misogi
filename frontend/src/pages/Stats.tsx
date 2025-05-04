@@ -44,6 +44,8 @@ export const Stats = () => {
       getHeatmapData(currentDate.getFullYear(), currentDate.getMonth() + 1),
   })
   console.log('\n\n\n\nthis is heatMapData:', heatmapData, '\n\n\n\n')
+  console.log('this is stats', stats)
+  console.log('this is stats.data', stats?.data.topHabits.length)
   return (
     <div className="max-w-4xl mx-auto">
       <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">

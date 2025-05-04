@@ -10,6 +10,7 @@ export const getStats = asyncHandler(async (req: Request, res: Response) => {
   const userId = req.user.id
   const { period } = req.query
 
+  // console.log('asdasdasdasdsdaasdasd')
   // Determine date range based on period
   const today = new Date()
   today.setHours(0, 0, 0, 0)
@@ -137,6 +138,16 @@ export const getStats = asyncHandler(async (req: Request, res: Response) => {
           // Check if consecutive day
           const expectedDate = new Date(lastLogDate)
           expectedDate.setDate(expectedDate.getDate() + 1)
+
+          console.log(
+            'log date: ',
+            logDate,
+            logDate.getTime(),
+            'expected date:',
+            expectedDate,
+            expectedDate.getTime(),
+            lastLogDate
+          )
 
           if (logDate.getTime() === expectedDate.getTime()) {
             currentStreak++

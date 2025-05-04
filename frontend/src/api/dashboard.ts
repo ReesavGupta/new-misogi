@@ -30,8 +30,9 @@ export const getStats = async (
     const error = await response.json()
     throw new Error(error.message || 'Failed to fetch statistics')
   }
-
-  return response.json()
+  // const a = await response.json()
+  // console.log('this is the stats:', a)
+  return await response.json()
 }
 
 export const getHeatmapData = async (
@@ -56,6 +57,7 @@ export const getHeatmapData = async (
     const error = await response.json()
     throw new Error(error.message || 'Failed to fetch heatmap data')
   }
-
-  return response.json()
+  const a = await response.json()
+  console.log('this is heatmap data inside api : ', a)
+  return await response.json()
 }

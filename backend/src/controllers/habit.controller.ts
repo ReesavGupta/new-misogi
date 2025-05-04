@@ -96,6 +96,8 @@ export const getHabits = asyncHandler(async (req: Request, res: Response) => {
     }
   })
 
+  console.log('these are enhancedHabits: ', enhancedHabits)
+
   res.json(ApiResponse.success(enhancedHabits))
 })
 
@@ -507,6 +509,9 @@ export const getTodayHabits = asyncHandler(
 /**
  * Helper function to calculate current and longest streaks
  */
+/**
+ * Helper function to calculate current and longest streaks
+ */
 function calculateStreaks(habit: any): {
   currentStreak: number
   longestStreak: number
@@ -521,57 +526,95 @@ function calculateStreaks(habit: any): {
     (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
   )
 
+  console.log('sorted logs: ', sortedLogs)
+
   let currentStreak = 0
   let longestStreak = 0
   let tempStreak = 0
-  let lastDate: Date | null = null
+
+  // Get today's date (without time component)
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
 
   // Calculate the current streak (consecutive completed days)
-  for (const log of sortedLogs) {
-    const logDate = new Date(log.date)
-    logDate.setHours(0, 0, 0, 0)
+  // First check if the most recent log is from today
+  const mostRecentLog = sortedLogs[0]
+  if (mostRecentLog) {
+    const mostRecentDate = new Date(mostRecentLog.date)
+    mostRecentDate.setHours(0, 0, 0, 0)
 
-    // If this is the first log we're checking
-    if (lastDate === null) {
-      // Start the streak if the log is completed
-      if (log.completed) {
+    console.log('time : ', mostRecentDate.getTime(), today.getTime())
+    // If the most recent log is from today and it's completed
+    if (
+      mostRecentDate.getTime() === today.getTime() &&
+      mostRecentLog.completed
+    ) {
+      currentStreak = 1
+
+      // Now check for consecutive previous days
+      let previousDate = new Date(today)
+
+      // Start from the second log (index 1) since we've already processed the first one
+      for (let i = 1; i < sortedLogs.length; i++) {
+        const log = sortedLogs[i]
+        const logDate = new Date(log.date)
+        logDate.setHours(0, 0, 0, 0)
+        console.log('if above prev date:', previousDate)
+
+        // Calculate the expected previous date (1 day before)
+        previousDate.setDate(previousDate.getDate() - 1)
+        console.log('if below prev date:', previousDate)
+
+        // If the log is not from the expected previous day or it's not completed, break the streak
+        if (logDate.getTime() !== previousDate.getTime() || !log.completed) {
+          break
+        }
+
+        // Increment the streak and update the reference date
+        currentStreak++
+      }
+    }
+    // If the most recent log is from yesterday and it's completed
+    else {
+      const yesterday = new Date(today)
+      yesterday.setDate(yesterday.getDate() - 1)
+      console.log(
+        'else block time: ',
+        mostRecentDate.getTime(),
+        yesterday.getTime()
+      )
+      if (
+        mostRecentDate.getTime() === yesterday.getTime() &&
+        mostRecentLog.completed
+      ) {
         currentStreak = 1
 
-        // Check if the log is for today or yesterday
-        const today = new Date()
-        today.setHours(0, 0, 0, 0)
-        const yesterday = new Date(today)
-        yesterday.setDate(yesterday.getDate() - 1)
+        // Check for consecutive previous days
+        let previousDate = new Date(yesterday)
 
-        // If the log is not for today or yesterday, the current streak is broken
-        if (
-          logDate.getTime() !== today.getTime() &&
-          logDate.getTime() !== yesterday.getTime()
-        ) {
-          currentStreak = 0
+        // Start from the second log (index 1)
+        for (let i = 1; i < sortedLogs.length; i++) {
+          const log = sortedLogs[i]
+          const logDate = new Date(log.date)
+          logDate.setHours(0, 0, 0, 0)
+          console.log('above prev date:', previousDate)
+          // Calculate the expected previous date
+          previousDate.setDate(previousDate.getDate() - 1)
+          console.log('below prev date:', previousDate)
+          // If the log doesn't match the expected date or isn't completed, break
+          if (logDate.getTime() !== previousDate.getTime() || !log.completed) {
+            break
+          }
+
+          currentStreak++
         }
       }
-      lastDate = logDate
-      continue
     }
-
-    // For subsequent logs, check if they are consecutive days
-    const expectedPrevDate = new Date(lastDate)
-    expectedPrevDate.setDate(expectedPrevDate.getDate() - 1)
-
-    // If there's a gap or the log is not completed, current streak is broken
-    if (logDate.getTime() !== expectedPrevDate.getTime() || !log.completed) {
-      break
-    }
-
-    // Increment streak
-    currentStreak++
-    lastDate = logDate
   }
 
   // Calculate the longest streak
   tempStreak = 0
-  lastDate = null
+  let lastDate = null
 
   for (const log of sortedLogs) {
     if (!log.completed) {
@@ -608,3 +651,46 @@ function calculateStreaks(habit: any): {
 
   return { currentStreak, longestStreak }
 }
+
+// function calculateStreaks1(habit: any): {
+//   currentStreak: number
+//   longestStreak: number
+// } {
+//   const logs = habit.habitLogs || []
+//   if (logs.length === 0) {
+//     return { currentStreak: 0, longestStreak: 0 }
+//   }
+
+//   const sortedLogs = [...logs].sort(
+//     (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+//   )
+
+//   let currentStreak = 0
+//   let longestStreak = 0
+//   let tempStreak = 0
+
+//   // Get today's date (without time component)
+//   const today = new Date()
+//   today.setHours(0, 0, 0, 0)
+
+//   let previousDate = new Date(yesterday)
+
+//   for (let i = 1; i < sortedLogs.length; i++) {
+//     const log = sortedLogs[i]
+//     const logDate = new Date(log.date)
+//     logDate.setHours(0, 0, 0, 0)
+
+//     // Calculate the expected previous date (1 day before)
+//     previousDate.setDate(previousDate.getDate() - 1)
+
+//     // If the log is not from the expected previous day or it's not completed, break the streak
+//     if (logDate.getTime() !== previousDate.getTime() || !log.completed) {
+//       break
+//     }
+
+//     // Increment the streak and update the reference date
+//     currentStreak++
+//   }
+
+//   return { currentStreak: 0, longestStreak: 0 }
+// }
