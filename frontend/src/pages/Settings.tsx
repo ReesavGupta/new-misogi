@@ -5,7 +5,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { getUserSettings, updateUserSettings } from '../api/settings'
 import { useAuth } from '../contexts/AuthContext'
 import { useTheme } from '../contexts/ThemeContext'
-import { Moon, Sun, Bell } from 'lucide-react'
+import { Moon, Sun } from 'lucide-react'
 import toast from 'react-hot-toast'
 
 const Settings = () => {
@@ -22,7 +22,7 @@ const Settings = () => {
     retry: 2,
   })
 
-  const { mutate: updateSettings, isPending } = useMutation({
+  const { mutate: updateSettings } = useMutation({
     mutationFn: updateUserSettings,
     onSuccess: () => {
       toast.success('Settings updated successfully!')
@@ -40,13 +40,13 @@ const Settings = () => {
     }
   }, [settings])
 
-  const handleReminderTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setReminderTime(e.target.value)
-  }
+  // const handleReminderTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   setReminderTime(e.target.value)
+  // }
 
-  const handleSaveReminderTime = () => {
-    updateSettings({ reminderTime })
-  }
+  // const handleSaveReminderTime = () => {
+  //   updateSettings({ reminderTime })
+  // }
 
   if (isLoading || isThemeLoading) {
     return (

@@ -7,7 +7,6 @@ import HeatmapCalendar from '../components/HeatmapCalendar'
 import { BarChart2, Calendar, Award, Trash2 } from 'lucide-react'
 import { queryKeys } from '../api/query-keys/queryKeys'
 import toast from 'react-hot-toast'
-import { useNavigate } from 'react-router-dom'
 
 type Period = 'week' | 'month' | 'year'
 
@@ -16,7 +15,7 @@ export const Stats = () => {
   const [currentDate] = useState(new Date())
 
   const queryClient = useQueryClient()
-  const navigate = useNavigate()
+  // const navigate = useNavigate()
 
   const { mutate: deleteHabitMutation, isPending: isDeleting } = useMutation({
     mutationFn: (id: string) => deleteHabit(id),

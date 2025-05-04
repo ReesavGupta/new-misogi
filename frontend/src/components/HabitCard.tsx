@@ -195,7 +195,7 @@ export const HabitCard = ({ habit, isToday }: HabitCardProps) => {
 
       toast.error('Failed to update habit status')
     },
-    onSettled: (_, error, variables) => {
+    onSettled: (_, __, variables) => {
       // Fix: Pass the variables properly to onSettled
       console.log(`onSettled called for habit ${variables?.habitId}`)
 
