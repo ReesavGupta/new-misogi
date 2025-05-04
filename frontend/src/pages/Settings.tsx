@@ -1,18 +1,15 @@
-import type React from 'react'
-
 import { useState, useEffect } from 'react'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { getUserSettings, updateUserSettings } from '../api/settings'
+import { useQuery } from '@tanstack/react-query'
+import { getUserSettings } from '../api/settings'
 import { useAuth } from '../contexts/AuthContext'
 import { useTheme } from '../contexts/ThemeContext'
 import { Moon, Sun } from 'lucide-react'
-import toast from 'react-hot-toast'
 
 const Settings = () => {
   const { user } = useAuth()
   const { theme, toggleTheme, isThemeLoading } = useTheme()
-  const queryClient = useQueryClient()
-  const [reminderTime, setReminderTime] = useState('')
+  // const queryClient = useQueryClient()
+  const [, setReminderTime] = useState('')
 
   // Use React Query to fetch settings
   const { data: settings, isLoading } = useQuery({
@@ -22,17 +19,17 @@ const Settings = () => {
     retry: 2,
   })
 
-  const { mutate: updateSettings } = useMutation({
-    mutationFn: updateUserSettings,
-    onSuccess: () => {
-      toast.success('Settings updated successfully!')
-      // Invalidate and refetch settings after update
-      queryClient.invalidateQueries({ queryKey: ['settings'] })
-    },
-    onError: () => {
-      toast.error('Failed to update settings')
-    },
-  })
+  // const { mutate: updateSettings } = useMutation({
+  //   mutationFn: updateUserSettings,
+  //   onSuccess: () => {
+  //     toast.success('Settings updated successfully!')
+  //     // Invalidate and refetch settings after update
+  //     queryClient.invalidateQueries({ queryKey: ['settings'] })
+  //   },
+  //   onError: () => {
+  //     toast.error('Failed to update settings')
+  //   },
+  // })
 
   useEffect(() => {
     if (settings?.data?.reminderTime) {
