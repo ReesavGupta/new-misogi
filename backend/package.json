@@ -7,7 +7,9 @@
     "@types/bun": "latest"
   },
   "scripts": {
-    "dev": "bun run ./src/index.ts"
+    "build": "bun install && npx prisma generate",
+    "dev": "bun run ./src/index.ts",
+    "start" : "bun run src/index.ts"
   },
   "peerDependencies": {
     "typescript": "^5"
