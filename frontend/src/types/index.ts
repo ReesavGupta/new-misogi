@@ -2,6 +2,9 @@
 export interface ApiResponse {
   status: string
   data: any
+  accessToken: string
+  success: string
+  user: User
 }
 
 // User Types

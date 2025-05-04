@@ -7,7 +7,7 @@ import {
   type ReactNode,
 } from 'react'
 import { loginUser, registerUser, logoutUser, refreshToken } from '../api/auth'
-import type { User, ApiResponse } from '../types'
+import type { User } from '../types'
 
 interface AuthContextType {
   user: User | null
@@ -39,6 +39,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
             if (response.success || response.status === 'success') {
               // Store the new token
+
               const accessToken =
                 response.data?.accessToken || response.accessToken
               localStorage.setItem('accessToken', accessToken)
