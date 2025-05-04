@@ -36,12 +36,25 @@ const HeatmapCalendar = ({ data, year, month }: HeatmapCalendarProps) => {
   const dateMap = useMemo(() => {
     const map = new Map<string, number>()
     data.forEach((item) => {
-      // Create a date that's timezone-safe
-      const dateStr = new Date(item.date).toISOString().split('T')[0]
+      const date = new Date(item.date)
+      const year = date.getFullYear()
+      const month = String(date.getMonth() + 1).padStart(2, '0')
+      const day = String(date.getDate()).padStart(2, '0')
+      const dateStr = `${year}-${month}-${day}` // LOCAL date string
       map.set(dateStr, item.value)
     })
     return map
   }, [data])
+  // const dateMap = useMemo(() => {
+  //   const map = new Map<string, number>()
+  //   data.forEach((item) => {
+  //     // Create a date that's timezone-safe
+  //     const dateStr = new Date(item.date).toISOString().split('T')[0]
+  //     map.set(dateStr, item.value)
+  //   })
+  //   return map
+  // }, [data])
+  console.log('this is data:', data)
 
   const getColorClass = (value: number | undefined) => {
     if (value === undefined) return 'bg-gray-100 dark:bg-gray-800'
@@ -74,6 +87,8 @@ const HeatmapCalendar = ({ data, year, month }: HeatmapCalendarProps) => {
         today.getFullYear() === year &&
         today.getMonth() === month &&
         today.getDate() === day
+
+      // console.log(this is )
 
       console.log('datemap: ', dateMap)
       console.log('value: ', value)

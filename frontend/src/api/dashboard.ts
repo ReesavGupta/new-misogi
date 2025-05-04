@@ -59,5 +59,5 @@ export const getHeatmapData = async (
   }
   const a = await response.json()
   console.log('this is heatmap data inside api : ', a)
-  return await response.json()
+  return a
 }
