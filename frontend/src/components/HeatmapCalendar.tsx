@@ -1,4 +1,3 @@
-
 import { useMemo } from 'react'
 import type { HeatmapData } from '../types'
 
@@ -33,18 +32,19 @@ const HeatmapCalendar = ({ data, year, month }: HeatmapCalendarProps) => {
     'December',
   ]
 
-  // Create a map of date strings to completion status
+  // Improved date mapping logic to handle date conversions correctly
   const dateMap = useMemo(() => {
     const map = new Map<string, number>()
     data.forEach((item) => {
+      // Format date as YYYY-MM-DD
       const date = new Date(item.date)
-      if (date.getFullYear() === year && date.getMonth() === month) {
-        const day = date.getDate()
-        map.set(day.toString(), item.value)
-      }
+      const formattedDate = `${date.getFullYear()}-${String(
+        date.getMonth() + 1
+      ).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
+      map.set(formattedDate, item.value)
     })
     return map
-  }, [data, year, month])
+  }, [data])
 
   const getColorClass = (value: number | undefined) => {
     if (value === undefined) return 'bg-gray-100 dark:bg-gray-800'
@@ -54,24 +54,28 @@ const HeatmapCalendar = ({ data, year, month }: HeatmapCalendarProps) => {
 
   const renderCalendarDays = () => {
     const days = []
-
-    // Add empty cells for days before the first day of the month
     for (let i = 0; i < firstDayOfMonth; i++) {
       days.push(
         <div
           key={`empty-${i}`}
           className="h-10 w-10"
-        ></div>
+        />
       )
     }
 
-    // Add cells for each day of the month
     for (let day = 1; day <= daysInMonth; day++) {
-      const value = dateMap.get(day.toString())
+      // Create date string in YYYY-MM-DD format
+      const formattedMonth = String(month + 1).padStart(2, '0')
+      const formattedDay = String(day).padStart(2, '0')
+      const key = `${year}-${formattedMonth}-${formattedDay}`
+
+      const value = dateMap.get(key)
+
+      const today = new Date()
       const isToday =
-        new Date().getFullYear() === year &&
-        new Date().getMonth() === month &&
-        new Date().getDate() === day
+        today.getFullYear() === year &&
+        today.getMonth() === month &&
+        today.getDate() === day
 
       days.push(
         <div
@@ -80,7 +84,7 @@ const HeatmapCalendar = ({ data, year, month }: HeatmapCalendarProps) => {
             isToday ? 'ring-2 ring-indigo-500 dark:ring-indigo-400' : ''
           } ${getColorClass(value)}`}
         >
-          {day}
+          <p>{day}</p>
         </div>
       )
     }

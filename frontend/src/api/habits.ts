@@ -109,6 +109,7 @@ export const logHabitCompletion = async (
     body: JSON.stringify(logData),
   })
 
+  console.log('inside api : ', logData.date)
   if (!response.ok) {
     const error = await response.json()
     throw new Error(error.message || 'Failed to log habit completion')

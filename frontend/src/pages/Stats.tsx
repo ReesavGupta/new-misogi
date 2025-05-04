@@ -1,28 +1,49 @@
-
 import { useState } from 'react'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { getStats, getHeatmapData } from '../api/dashboard'
+import { deleteHabit } from '../api/habits'
 import StreakChart from '../components/StreakChart'
 import HeatmapCalendar from '../components/HeatmapCalendar'
-import { BarChart2, Calendar, Award } from 'lucide-react'
+import { BarChart2, Calendar, Award, Trash2 } from 'lucide-react'
+import { queryKeys } from '../api/query-keys/queryKeys'
+import toast from 'react-hot-toast'
+import { useNavigate } from 'react-router-dom'
 
 type Period = 'week' | 'month' | 'year'
 
-const Stats = () => {
+export const Stats = () => {
   const [period, setPeriod] = useState<Period>('week')
   const [currentDate] = useState(new Date())
 
+  const queryClient = useQueryClient()
+  const navigate = useNavigate()
+
+  const { mutate: deleteHabitMutation, isPending: isDeleting } = useMutation({
+    mutationFn: (id: string) => deleteHabit(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.habits.all })
+      queryClient.invalidateQueries({ queryKey: queryKeys.stats.all })
+      toast.success('Habit deleted successfully!')
+    },
+    onError: () => {
+      toast.error('Failed to delete habit')
+    },
+  })
+
   const { data: stats, isLoading: isLoadingStats } = useQuery({
-    queryKey: ['stats', period],
+    queryKey: queryKeys.stats.byPeriod(period),
     queryFn: () => getStats(period),
   })
 
   const { data: heatmapData, isLoading: isLoadingHeatmap } = useQuery({
-    queryKey: ['heatmap', currentDate.getFullYear(), currentDate.getMonth()],
+    queryKey: queryKeys.stats.heatmap(
+      currentDate.getFullYear(),
+      currentDate.getMonth()
+    ),
     queryFn: () =>
       getHeatmapData(currentDate.getFullYear(), currentDate.getMonth() + 1),
   })
-
+  console.log('\n\n\n\nthis is heatMapData:', heatmapData, '\n\n\n\n')
   return (
     <div className="max-w-4xl mx-auto">
       <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
@@ -93,36 +114,19 @@ const Stats = () => {
                 Habit Performance
               </h2>
               <div className="flex space-x-2">
-                <button
-                  onClick={() => setPeriod('week')}
-                  className={`px-3 py-1 text-sm rounded-md ${
-                    period === 'week'
-                      ? 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200'
-                      : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200'
-                  }`}
-                >
-                  Week
-                </button>
-                <button
-                  onClick={() => setPeriod('month')}
-                  className={`px-3 py-1 text-sm rounded-md ${
-                    period === 'month'
-                      ? 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200'
-                      : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200'
-                  }`}
-                >
-                  Month
-                </button>
-                <button
-                  onClick={() => setPeriod('year')}
-                  className={`px-3 py-1 text-sm rounded-md ${
-                    period === 'year'
-                      ? 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200'
-                      : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200'
-                  }`}
-                >
-                  Year
-                </button>
+                {(['week', 'month', 'year'] as Period[]).map((p) => (
+                  <button
+                    key={p}
+                    onClick={() => setPeriod(p)}
+                    className={`px-3 py-1 text-sm rounded-md ${
+                      period === p
+                        ? 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200'
+                        : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200'
+                    }`}
+                  >
+                    {p.charAt(0).toUpperCase() + p.slice(1)}
+                  </button>
+                ))}
               </div>
             </div>
 
@@ -151,9 +155,20 @@ const Stats = () => {
                         {habit.name}
                       </span>
                     </div>
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
-                      {habit.longestStreak} day streak
-                    </span>
+                    <div className="inline-flex items-center space-x-2">
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                        {habit.longestStreak} day streak
+                      </span>
+                      <button
+                        onClick={() => deleteHabitMutation(habit.id)}
+                        disabled={isDeleting}
+                        className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200 hover:underline disabled:opacity-50"
+                        title="Delete Habit"
+                      >
+                        <Trash2 className="h-4 w-4 mr-1" />
+                        Delete
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -191,5 +206,3 @@ const Stats = () => {
     </div>
   )
 }
-
-export default Stats

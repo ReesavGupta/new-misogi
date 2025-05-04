@@ -1,6 +1,4 @@
-
 import type React from 'react'
-
 import { useState, useEffect } from 'react'
 import type { Habit } from '../types'
 import { Calendar } from 'lucide-react'
@@ -61,12 +59,12 @@ const HabitForm = ({ initialData, onSubmit, isSubmitting }: HabitFormProps) => {
   return (
     <form
       onSubmit={handleSubmit}
-      className="space-y-6"
+      className="space-y-6 bg-white dark:bg-gray-900 p-6 rounded-xl shadow-lg max-w-lg mx-auto"
     >
       <div>
         <label
           htmlFor="name"
-          className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+          className="block text-sm font-semibold text-gray-800 dark:text-gray-200"
         >
           Habit Name
         </label>
@@ -75,83 +73,52 @@ const HabitForm = ({ initialData, onSubmit, isSubmitting }: HabitFormProps) => {
           id="name"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          className="input mt-1"
+          className="mt-2 w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-4 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
           placeholder="e.g., Drink 2L water"
           required
         />
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+        <p className="block text-sm font-semibold text-gray-800 dark:text-gray-200">
           Target Days
-        </label>
-        <div className="mt-1 space-y-2">
-          <div className="flex items-center">
-            <input
-              type="radio"
-              id="everyday"
-              name="targetDays"
-              value="everyday"
-              checked={targetDays === 'everyday'}
-              onChange={() => setTargetDays('everyday')}
-              className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300"
-            />
+        </p>
+        <div className="mt-2 space-y-2">
+          {['everyday', 'weekdays', 'custom'].map((option) => (
             <label
-              htmlFor="everyday"
-              className="ml-2 block text-sm text-gray-700 dark:text-gray-300"
+              key={option}
+              className="flex items-center gap-2 text-sm"
             >
-              Every day
+              <input
+                type="radio"
+                name="targetDays"
+                value={option}
+                checked={targetDays === option}
+                onChange={() => setTargetDays(option)}
+                className="h-4 w-4 text-indigo-600 focus:ring-indigo-500"
+              />
+              <span className="text-gray-700 dark:text-gray-300 capitalize">
+                {option === 'everyday'
+                  ? 'Every day'
+                  : option === 'weekdays'
+                  ? 'Weekdays (Mon–Fri)'
+                  : 'Custom days'}
+              </span>
             </label>
-          </div>
-
-          <div className="flex items-center">
-            <input
-              type="radio"
-              id="weekdays"
-              name="targetDays"
-              value="weekdays"
-              checked={targetDays === 'weekdays'}
-              onChange={() => setTargetDays('weekdays')}
-              className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300"
-            />
-            <label
-              htmlFor="weekdays"
-              className="ml-2 block text-sm text-gray-700 dark:text-gray-300"
-            >
-              Weekdays (Mon-Fri)
-            </label>
-          </div>
-
-          <div className="flex items-center">
-            <input
-              type="radio"
-              id="custom"
-              name="targetDays"
-              value="custom"
-              checked={targetDays === 'custom'}
-              onChange={() => setTargetDays('custom')}
-              className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300"
-            />
-            <label
-              htmlFor="custom"
-              className="ml-2 block text-sm text-gray-700 dark:text-gray-300"
-            >
-              Custom days
-            </label>
-          </div>
+          ))}
 
           {targetDays === 'custom' && (
-            <div className="ml-6 mt-2">
-              <div className="flex space-x-1">
+            <div className="ml-6 mt-3">
+              <div className="flex flex-wrap gap-2">
                 {dayNames.map((day, index) => (
                   <button
                     key={day}
                     type="button"
                     onClick={() => toggleCustomDay(index)}
-                    className={`w-10 h-10 rounded-full text-xs font-medium flex items-center justify-center ${
+                    className={`w-10 h-10 rounded-full text-xs font-semibold flex items-center justify-center transition ${
                       customDays.includes(index)
                         ? 'bg-indigo-600 text-white'
-                        : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200'
+                        : 'bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-200'
                     }`}
                   >
                     {day}
@@ -159,7 +126,7 @@ const HabitForm = ({ initialData, onSubmit, isSubmitting }: HabitFormProps) => {
                 ))}
               </div>
               {customDays.length === 0 && (
-                <p className="text-xs text-red-500 mt-1">
+                <p className="text-xs text-red-500 mt-2">
                   Please select at least one day
                 </p>
               )}
@@ -171,11 +138,11 @@ const HabitForm = ({ initialData, onSubmit, isSubmitting }: HabitFormProps) => {
       <div>
         <label
           htmlFor="startDate"
-          className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+          className="block text-sm font-semibold text-gray-800 dark:text-gray-200"
         >
           Start Date
         </label>
-        <div className="mt-1 relative">
+        <div className="relative mt-2">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
             <Calendar className="h-5 w-5 text-gray-400" />
           </div>
@@ -184,7 +151,7 @@ const HabitForm = ({ initialData, onSubmit, isSubmitting }: HabitFormProps) => {
             id="startDate"
             value={startDate}
             onChange={(e) => setStartDate(e.target.value)}
-            className="input pl-10"
+            className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
             required
           />
         </div>
@@ -196,7 +163,7 @@ const HabitForm = ({ initialData, onSubmit, isSubmitting }: HabitFormProps) => {
           disabled={
             isSubmitting || (targetDays === 'custom' && customDays.length === 0)
           }
-          className="btn btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
+          className="px-6 py-2 rounded-lg bg-indigo-600 text-white font-semibold shadow hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
         >
           {isSubmitting
             ? 'Saving...'

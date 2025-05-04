@@ -1,4 +1,3 @@
-
 import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
@@ -12,6 +11,7 @@ import HabitForm from '../components/HabitForm'
 import HeatmapCalendar from '../components/HeatmapCalendar'
 import { Edit, Trash2, ChevronLeft, ChevronRight } from 'lucide-react'
 import toast from 'react-hot-toast'
+import { queryKeys } from '../api/query-keys/queryKeys'
 
 const HabitDetail = () => {
   const { id } = useParams<{ id: string }>()
@@ -21,18 +21,17 @@ const HabitDetail = () => {
   const [currentDate, setCurrentDate] = useState(new Date())
 
   const { data: habit, isLoading: isLoadingHabit } = useQuery({
-    queryKey: ['habits', id],
+    queryKey: queryKeys.habits.detail(id!),
     queryFn: () => getHabit(id!),
     enabled: !!id,
   })
 
   const { data: heatmapData, isLoading: isLoadingHeatmap } = useQuery({
-    queryKey: [
-      'heatmap',
+    queryKey: queryKeys.habits.heatmap(
       id,
       currentDate.getFullYear(),
-      currentDate.getMonth(),
-    ],
+      currentDate.getMonth()
+    ),
     queryFn: () =>
       getHeatmapData(currentDate.getFullYear(), currentDate.getMonth() + 1, id),
     enabled: !!id,
@@ -41,8 +40,10 @@ const HabitDetail = () => {
   const { mutate: updateHabitMutation, isPending: isUpdating } = useMutation({
     mutationFn: (data: any) => updateHabit(id!, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['habits'] })
-      queryClient.invalidateQueries({ queryKey: ['habits', id] })
+      // Invalidate all habit-related queries to ensure fresh data everywhere
+      queryClient.invalidateQueries({ queryKey: queryKeys.habits.all })
+      // Additionally invalidate stats since they may depend on habits
+      queryClient.invalidateQueries({ queryKey: queryKeys.stats.all })
       setIsEditing(false)
       toast.success('Habit updated successfully!')
     },
@@ -54,7 +55,10 @@ const HabitDetail = () => {
   const { mutate: deleteHabitMutation, isPending: isDeleting } = useMutation({
     mutationFn: () => deleteHabit(id!),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['habits'] })
+      // Invalidate all habit-related queries
+      queryClient.invalidateQueries({ queryKey: queryKeys.habits.all })
+      // Additionally invalidate stats
+      queryClient.invalidateQueries({ queryKey: queryKeys.stats.all })
       navigate('/')
       toast.success('Habit deleted successfully!')
     },

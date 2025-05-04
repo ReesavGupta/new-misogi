@@ -253,6 +253,8 @@ export const logHabitCompletion = asyncHandler(
     const userId = req.user.id
     const { date, completed } = req.body
 
+    console.log('this is the date: ', date)
+
     if (typeof completed !== 'boolean') {
       throw new ApiError(400, 'Completion status must be a boolean')
     }
@@ -429,7 +431,9 @@ export const getTodayHabits = asyncHandler(
 
     // Get day of week (0 = Sunday, 1 = Monday, etc.)
     const dayOfWeek = today.getDay()
-
+    console.log('this is the day of the week ', dayOfWeek)
+    console.log('this is the today ', today)
+    console.log('this is the today start ', todayStart)
     // Find all habits for the user
     const habits = await prisma.habit.findMany({
       where: {
@@ -438,14 +442,17 @@ export const getTodayHabits = asyncHandler(
           lte: today, // Only include habits that have already started
         },
       },
+      // include: {
+      //   habitLogs: {
+      //     where: {
+      //       habitId: {
+      //         equals: habit.id,
+      //       },
+      //     },
+      //   },
+      // },
       include: {
-        habitLogs: {
-          where: {
-            date: {
-              equals: todayStart,
-            },
-          },
-        },
+        habitLogs: true,
       },
     })
 
@@ -476,10 +483,14 @@ export const getTodayHabits = asyncHandler(
       return false
     })
 
+    console.log('this is todays habit: ', todayHabits)
+
     // Enhance habits with streak information and today's completion status
     const enhancedHabits = todayHabits.map((habit) => {
       const { currentStreak, longestStreak } = calculateStreaks(habit)
       const todayLog = habit.habitLogs[0] || null
+
+      console.log('this is the habit ', habit.name, 'this is the log', todayLog)
 
       return {
         ...habit,

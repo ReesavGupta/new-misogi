@@ -9,20 +9,30 @@ import { AuthProvider, useAuth } from './contexts/AuthContext'
 // Pages
 import Login from './pages/Login'
 import Register from './pages/Register'
-import Dashboard from './pages/Dashboard'
+import { Dashboard } from './pages/Dashboard'
 import HabitDetail from './pages/HabitDetail'
 import Settings from './pages/Settings'
-import Stats from './pages/Stats'
+import { Stats } from './pages/Stats'
 import NotFound from './pages/NotFound'
 
 // Components
 import Layout from './components/Layout'
 
 // Create a client
-const queryClient = new QueryClient({
+export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 1000 * 60 * 5, // 5 minutes
+      // By default, queries will be retried on failure
+      retry: 1,
+      // Queries will refetch when the window regains focus
+      refetchOnWindowFocus: true,
+      // Queries are considered stale after 30 seconds
+      staleTime: 30 * 1000,
+      // Cached data will be removed after 5 minutes of inactivity
+      gcTime: 5 * 60 * 1000,
+    },
+    mutations: {
+      // By default, mutations will be retried once on failure
       retry: 1,
     },
   },
@@ -31,6 +41,7 @@ const queryClient = new QueryClient({
 // Protected route component
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated, isLoading } = useAuth()
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-screen">
@@ -52,7 +63,16 @@ function App() {
       <AuthProvider>
         <ThemeProvider>
           <BrowserRouter>
-            <Toaster position="top-right" />
+            <Toaster
+              position="bottom-right"
+              toastOptions={{
+                duration: 3000,
+                style: {
+                  background: '#333',
+                  color: '#fff',
+                },
+              }}
+            />
             <Routes>
               <Route
                 path="/login"
@@ -62,6 +82,8 @@ function App() {
                 path="/register"
                 element={<Register />}
               />
+
+              {/* Protected routes */}
               <Route
                 path="/"
                 element={
@@ -73,7 +95,7 @@ function App() {
                 }
               />
               <Route
-                path="/habit/:id"
+                path="/habits/:id"
                 element={
                   <ProtectedRoute>
                     <Layout>
@@ -102,6 +124,8 @@ function App() {
                   </ProtectedRoute>
                 }
               />
+
+              {/* Fallback route */}
               <Route
                 path="*"
                 element={<NotFound />}
