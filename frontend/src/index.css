@@ -1,4 +1,11 @@
+@config "../tailwind.config.js";
+
+/* index.css */
 @import 'tailwindcss';
+/* Override the default dark: variant to trigger on the .dark class */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* You can add other global styles here, or leave it as just the imports above. */
 
 :root {
   --background: 0 0% 100%;
@@ -8,11 +15,4 @@
 .dark {
   --background: 222.2 84% 4.9%;
   --foreground: 210 40% 98%;
-}
-
-h1,
-h2,
-p,
-span{
-  color: white;
 }

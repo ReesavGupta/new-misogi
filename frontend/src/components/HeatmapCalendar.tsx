@@ -102,7 +102,7 @@ const HeatmapCalendar = ({ data, year, month }: HeatmapCalendarProps) => {
             isToday ? 'ring-2 ring-indigo-500 dark:ring-indigo-400' : ''
           } ${getColorClass(value)}`}
         >
-          <p>{day}</p>
+          <p className="text-gray-900 dark:text-white">{day}</p>
         </div>
       )
     }

@@ -119,7 +119,7 @@ export const DailyQuote: React.FC = () => {
           Daily quote disabled
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-sm font-medium">Show quotes</span>
+          <span className="text-sm font-medium dark:text-white text-gray-900">Show quotes</span>
           <Toggle
             checked={isEnabled}
             onChange={handleToggleChange}
@@ -139,7 +139,9 @@ export const DailyQuote: React.FC = () => {
           </h2>
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-sm font-medium">Show quotes</span>
+          <span className="text-sm font-medium dark:text-white text-gray-900">
+            Show quotes
+          </span>
           <Toggle
             checked={isEnabled}
             onChange={handleToggleChange}

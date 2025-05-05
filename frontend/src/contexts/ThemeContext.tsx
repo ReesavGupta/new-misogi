@@ -141,10 +141,10 @@ const ThemeToggle = () => {
         ) : (
           <Sun className="h-5 w-5 text-yellow-500" />
         )}
-        <span className="ml-2 text-sm text-gray-900 dark:text-white">
+        <span className="ml-2 text-sm text-black dark:text-white">
           {theme === 'dark' ? 'Dark' : 'Light'} Mode
         </span>
-      </div>  
+      </div>
     </div>
   )
 }

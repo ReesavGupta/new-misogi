@@ -45,7 +45,7 @@ export const signupHandler = asyncHandler(
       .cookie('refreshToken', refreshToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
-        sameSite: 'strict',
+        sameSite: 'none',
         maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
       })
       .status(201)
@@ -91,7 +91,7 @@ export const loginHanlder = asyncHandler(
       .cookie('refreshToken', refreshToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
-        sameSite: 'strict',
+        sameSite: 'none',
         maxAge: 7 * 24 * 60 * 60 * 1000,
       })
       .json(
@@ -166,7 +166,7 @@ export const refreshTokenHandler = asyncHandler(
       .cookie('refreshToken', newRefreshToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
-        sameSite: 'strict',
+        sameSite: 'none',
         maxAge: 7 * 24 * 60 * 60 * 1000,
       })
       .json(ApiResponse.success({ accessToken: newAccessToken }))
