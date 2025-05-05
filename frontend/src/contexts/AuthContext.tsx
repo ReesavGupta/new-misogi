@@ -8,7 +8,6 @@ import {
 } from 'react'
 import { loginUser, registerUser, logoutUser, refreshToken } from '../api/auth'
 import type { User } from '../types'
-import { useNavigate } from 'react-router-dom'
 
 interface AuthContextType {
   user: User | null
