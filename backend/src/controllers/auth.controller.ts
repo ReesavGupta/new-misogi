@@ -45,7 +45,7 @@ export const signupHandler = asyncHandler(
       .cookie('refreshToken', refreshToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
-        sameSite: 'none',
+        sameSite: 'strict',
         maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
       })
       .status(201)
@@ -91,7 +91,7 @@ export const loginHanlder = asyncHandler(
       .cookie('refreshToken', refreshToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
-        sameSite: 'none',
+        sameSite: 'strict',
         maxAge: 7 * 24 * 60 * 60 * 1000,
       })
       .json(
@@ -122,7 +122,7 @@ export const logoutHandler = asyncHandler(
 export const refreshTokenHandler = asyncHandler(
   async (req: Request, res: Response) => {
     const token = req.cookies.refreshToken
-
+    console.log(`this is the token in refresjtokenHandler:`, token)
     if (!token) throw new ApiError(401, 'Refresh token missing')
 
     let payload: any
@@ -135,7 +135,7 @@ export const refreshTokenHandler = asyncHandler(
     const storedToken = await prisma.refreshToken.findUnique({
       where: { token },
     })
-
+    console.log(`this is the stored token : `, storedToken) //this is null
     if (
       !storedToken ||
       storedToken.revoked ||
@@ -166,7 +166,7 @@ export const refreshTokenHandler = asyncHandler(
       .cookie('refreshToken', newRefreshToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
-        sameSite: 'none',
+        sameSite: 'strict',
         maxAge: 7 * 24 * 60 * 60 * 1000,
       })
       .json(ApiResponse.success({ accessToken: newAccessToken }))

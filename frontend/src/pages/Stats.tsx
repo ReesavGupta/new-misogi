@@ -11,7 +11,12 @@ import toast from 'react-hot-toast'
 type Period = 'week' | 'month' | 'year'
 
 export const Stats = () => {
-  const [period, setPeriod] = useState<Period>('week')
+  const [period, setPeriod] = useState<Period>(() => {
+    const stored = localStorage.getItem('habit-period')
+    if (stored === 'week' || stored === 'month' || stored === 'year')
+      return stored
+    return 'week'
+  })
   const [currentDate] = useState(new Date())
 
   const queryClient = useQueryClient()
@@ -118,7 +123,10 @@ export const Stats = () => {
                 {(['week', 'month', 'year'] as Period[]).map((p) => (
                   <button
                     key={p}
-                    onClick={() => setPeriod(p)}
+                    onClick={() => {
+                      setPeriod(p)
+                      localStorage.setItem('habit-period', p)
+                    }}
                     className={`px-3 py-1 text-sm rounded-md ${
                       period === p
                         ? 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200'

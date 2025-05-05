@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { useTheme } from '../contexts/ThemeContext'
@@ -10,6 +10,27 @@ const Header = () => {
   const { user, logout } = useAuth()
   const { theme, toggleTheme } = useTheme()
   const navigate = useNavigate()
+
+  // Debug theme changes
+  useEffect(() => {
+    console.log('Current theme in Header:', theme)
+    console.log(
+      'HTML class:',
+      document.documentElement.classList.contains('dark') ? 'dark' : 'light'
+    )
+  }, [theme])
+
+  const handleThemeToggle = () => {
+    console.log('Theme toggle clicked, current theme:', theme)
+    toggleTheme()
+    // Check if theme actually changed after toggle
+    setTimeout(() => {
+      console.log(
+        'Theme after toggle:',
+        document.documentElement.classList.contains('dark') ? 'dark' : 'light'
+      )
+    }, 100)
+  }
 
   const handleLogout = async () => {
     await logout()
@@ -28,26 +49,23 @@ const Header = () => {
             >
               {isMobileMenuOpen ? (
                 <X
-                  className="h-6 w-6"
+                  className="h-5 w-5"
                   aria-hidden="true"
                 />
               ) : (
                 <Menu
-                  className="h-6 w-6"
+                  className="h-5 w-5"
                   aria-hidden="true"
                 />
               )}
             </button>
-            <h1 className="text-xl font-bold text-gray-900 dark:text-white ml-2 md:ml-0">
-              HabitVault
-            </h1>
           </div>
 
           <div className="flex items-center">
             <button
               type="button"
               className="p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700"
-              onClick={toggleTheme}
+              onClick={handleThemeToggle}
             >
               {theme === 'dark' ? (
                 <Sun
@@ -74,7 +92,7 @@ const Header = () => {
                 >
                   <span className="sr-only">Open user menu</span>
                   <div className="h-8 w-8 rounded-full flex items-center justify-center bg-indigo-100 dark:bg-indigo-800 text-indigo-800 dark:text-indigo-100">
-                    {user?.name.charAt(0).toUpperCase()}
+                    {user?.name?.charAt(0).toUpperCase() || '?'}
                   </div>
                 </button>
               </div>

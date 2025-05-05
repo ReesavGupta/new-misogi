@@ -1,5 +1,4 @@
 import client from '../prisma/client'
-import prisma from '../prisma/client'
 import { app } from './app'
 import dotenv from 'dotenv'
 

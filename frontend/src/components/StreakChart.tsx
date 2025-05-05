@@ -1,4 +1,3 @@
-
 import { useMemo } from 'react'
 import type { TimeSeriesData } from '../types'
 
@@ -9,23 +8,59 @@ interface StreakChartProps {
 
 const StreakChart = ({ data, period }: StreakChartProps) => {
   const chartData = useMemo(() => {
-    return data.map((item) => ({
-      date: new Date(item.date),
-      completed: item.completed,
-      missed: item.missed,
-      total: item.total,
-      completionRate:
-        item.total > 0 ? Math.round((item.completed / item.total) * 100) : 0,
-    }))
-  }, [data])
+    if (period !== 'year') {
+      // For week and month views, process data normally
+      return data.map((item) => ({
+        date: new Date(item.date),
+        completed: item.completed,
+        missed: item.missed,
+        total: item.total,
+        completionRate:
+          item.total > 0 ? Math.round((item.completed / item.total) * 100) : 0,
+      }))
+    } else {
+      // For year view, group data by month
+      const monthlyData = new Map()
+
+      data.forEach((item) => {
+        const date = new Date(item.date)
+        const monthKey = `${date.getFullYear()}-${date.getMonth()}`
+
+        if (!monthlyData.has(monthKey)) {
+          monthlyData.set(monthKey, {
+            date: new Date(date.getFullYear(), date.getMonth(), 1), // First day of month
+            completed: 0,
+            missed: 0,
+            total: 0,
+          })
+        }
+
+        const monthData = monthlyData.get(monthKey)
+        monthData.completed += item.completed
+        monthData.missed += item.missed
+        monthData.total += item.total
+      })
+
+      // Convert map to array and sort by date
+      return Array.from(monthlyData.values())
+        .sort((a, b) => a.date.getTime() - b.date.getTime())
+        .map((item) => ({
+          ...item,
+          completionRate:
+            item.total > 0
+              ? Math.round((item.completed / item.total) * 100)
+              : 0,
+        }))
+    }
+  }, [data, period])
 
   const formatDate = (date: Date) => {
     if (period === 'week') {
-      return date.toLocaleDateString('en-US', { weekday: 'short' })
+      return date.toLocaleDateString('en-US', { weekday: 'short' }) // e.g., "Mon"
     } else if (period === 'month') {
-      return date.toLocaleDateString('en-US', { day: 'numeric' })
+      return date.getDate().toString() // e.g., "1", "2", ..., "31"
     } else {
-      return date.toLocaleDateString('en-US', { month: 'short' })
+      return date.toLocaleDateString('en-US', { month: 'short' }) // e.g., "Jan", "Feb"
     }
   }
 

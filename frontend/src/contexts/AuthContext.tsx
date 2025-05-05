@@ -8,6 +8,7 @@ import {
 } from 'react'
 import { loginUser, registerUser, logoutUser, refreshToken } from '../api/auth'
 import type { User } from '../types'
+import { useNavigate } from 'react-router-dom'
 
 interface AuthContextType {
   user: User | null
@@ -23,7 +24,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined)
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-
+  // const navigate = useNavigate()
   useEffect(() => {
     // Check if user is already logged in
     const checkAuth = async () => {
@@ -95,7 +96,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setUser(userData)
 
         // After updating state, manually navigate
-        window.location.href = '/'
+        // navigate('/')
       } else {
         throw new Error('Login failed')
       }
@@ -150,7 +151,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     } finally {
       setIsLoading(false)
       // Redirect to login page after logout
-      window.location.href = '/login'
+      // navigate('/login')
     }
   }
 

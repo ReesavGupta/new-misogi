@@ -41,6 +41,7 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
   // Apply theme to DOM whenever it changes
   useEffect(() => {
     if (typeof window !== 'undefined') {
+      console.log('Applying theme to document:', theme)
       document.documentElement.classList.remove('light', 'dark')
       document.documentElement.classList.add(theme)
       localStorage.setItem('theme', theme)
@@ -54,6 +55,7 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
         setIsThemeLoading(true)
         try {
           const response = await getUserSettings()
+          console.log('Fetched user settings:', response)
           if (
             response?.data?.theme &&
             (response.data.theme === 'light' || response.data.theme === 'dark')
@@ -76,6 +78,7 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
 
   const toggleTheme = async () => {
     const newTheme = theme === 'light' ? 'dark' : 'light'
+    console.log('Toggling theme from', theme, 'to', newTheme)
 
     // Update state immediately for responsive UI
     setTheme(newTheme)
@@ -84,6 +87,7 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
     if (isAuthenticated) {
       try {
         await updateUserSettings({ theme: newTheme })
+        console.log('Theme preference saved to API')
       } catch (error) {
         console.error('Failed to update theme preference:', error)
         toast.error('Failed to save theme preference')
@@ -140,7 +144,7 @@ const ThemeToggle = () => {
         <span className="ml-2 text-sm text-gray-900 dark:text-white">
           {theme === 'dark' ? 'Dark' : 'Light'} Mode
         </span>
-      </div>
+      </div>  
     </div>
   )
 }

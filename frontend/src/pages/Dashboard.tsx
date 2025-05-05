@@ -3,13 +3,14 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { getTodayHabits, createHabit } from '../api/habits'
 import { HabitCard } from '../components/HabitCard'
 import HabitForm from '../components/HabitForm'
+import { DailyQuote } from '../components/DailyQuotes'
 import { Plus, X } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { Habit } from '../types'
 import { queryKeys } from '../api/query-keys/queryKeys'
 
-export const Dashboard = () => {
-  const [showAddForm, setShowAddForm] = useState(false)
+export const Dashboard: React.FC = () => {
+  const [showAddForm, setShowAddForm] = useState<boolean>(false)
   const queryClient = useQueryClient()
 
   const {
@@ -20,6 +21,7 @@ export const Dashboard = () => {
     queryKey: queryKeys.habits.today(),
     queryFn: getTodayHabits,
   })
+
   const { mutate: addHabit, isPending } = useMutation({
     mutationFn: createHabit,
     onSuccess: () => {
@@ -32,7 +34,6 @@ export const Dashboard = () => {
     },
   })
 
-  // console.log('this is habits inside dashboard: ', habits)
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -76,6 +77,9 @@ export const Dashboard = () => {
           )}
         </button>
       </div>
+
+      {/* Daily Quote Component */}
+      <DailyQuote />
 
       {showAddForm && (
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-6">
